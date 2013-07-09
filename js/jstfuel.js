@@ -89,13 +89,14 @@ jstfuel = (function()
 		return xhr;
 	}
 
-	function _loadTemplates(nspace)
+	function _loadTemplates(nspace, sync)
 	{
 		return $.ajax({
 			url: _getSrc( nspace ),
 			dataType: 'script',
 			cache: false,
-			type: 'GET'
+			type: 'GET',
+			async: typeof sync == undefined? true : false
 		})
 		.always(function()
 		{
@@ -180,7 +181,7 @@ jstfuel = (function()
 				};
 			};
 
-			_loadTemplates(nspace);
+			_loadTemplates(nspace, true);
 		}
 	}
 
