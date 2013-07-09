@@ -1,8 +1,8 @@
 jstfuel = (function()
 {
 	var watch = {},
-		timeout = {},
-		templateSources = {};
+	timeout = {},
+	templateSources = {};
 
 	var defaultTemplateAccessor = function(varname)
 	{
