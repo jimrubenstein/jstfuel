@@ -76,6 +76,8 @@ jstfuel.init({
 
 jstfuel allows you to automatically fetch and load your JST template file without refreshing your application/browser. This allows you to much more quickly iterate on your template code with a whole lot less frustration. In order to start reloading your templates, all you have to do is call `jstfuel.watch();`.
 
+When using `grunt`, `grunt-contrib-jst`, and `grunt-watch` if you fire up `grunt watch` in your command line (and attach the jst task to the watch task), grunt will automatically recompile your javascript templates as you save them. This will in turn get picked up by jstfuel, which will load them into the browser. Once that has completed, you'll be able to re-render parts of your application without reloading the entire thing.
+
 ## advanced things
 
 If you have multiple compiled JST files that your application uses, jstfuel can handle them all. All you have to do is define them in the `init` call. jstfuel will provide you with a different template method for each namespace (or file) you define in the init. In order to define each file, your config will look like this:
