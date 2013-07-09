@@ -126,7 +126,7 @@ jstfuel is created and maintained by [Jim Rubenstein](http://www.github.com/jimr
 ## License
 
     The MIT License (MIT)
-    Copyright (C) 2012-2013 by Jimmy Sawczuk
+    Copyright (C) 2013-2014 by Jim Rubenstein
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
