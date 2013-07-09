@@ -188,7 +188,7 @@ jstfuel = (function()
 		watch: watch,
 		unwatch: unwatch,
 
-		render: render,
+		render: render
 	};
 
 })();
