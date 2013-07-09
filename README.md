@@ -95,7 +95,10 @@ jstfuel.init({
 
 	anotherNS: {
 		compile_src: '/my-other/path.js',
-		accessor: 'MoreTemplates'
+		accessor: function()
+		{
+			return MyStrangeModule.getTemplates();
+		}
 	}
 });
 </script>
