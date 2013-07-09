@@ -176,9 +176,11 @@ jstfuel = (function()
 			{
 				return function(data)
 				{
-					render(nspace, template, data);
+					return render(nspace, template, data);
 				};
 			};
+
+			_loadTemplates(nspace);
 		}
 	}
 
