@@ -96,7 +96,7 @@ jstfuel = (function()
 			dataType: 'script',
 			cache: false,
 			type: 'GET',
-			async: typeof sync == undefined? true : false
+			async: sync? false : true
 		})
 		.always(function()
 		{
