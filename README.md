@@ -15,13 +15,13 @@ jstfuel operates on a few assumptions:
 
 To get started ustig jstfuel, all you need to do is include the `jstfuel.js` file into your web application and initialize it with some basic settings.
 
-```
+```html
 <script type="text/javascript" src="/js/jstfuel.js"></script>
 ```
 
 Once you do include it into your application, you initialize your templates like so:
 
-```
+```html
 <script type="text/javascript">
 jstfuel.init({
 	compile_src: '/path/to/compiled/templates.js'
@@ -31,7 +31,7 @@ jstfuel.init({
 
 Once you've done that, in all of your javascript modules, you'll utilize the `jstfuel` object to render your templates, similarly to how you'd utilize underscore templates and/or jst templates.
 
-```
+```html
 <script type="text/javascript">
 function renderThings()
 {
@@ -48,7 +48,7 @@ function renderThings()
 
 The above example assumes that your templates are compiled into the `JST` global variable namespace. Not all of us (including myself) do that, so jstfuel allows you to define the namespace that your templates are defined in, or provide a accessor method that returns your templates when called. Provide the `jstfuel.init` method a `accessor` property with the **string** value of the name of your namespace, or a closure that returns your template object.
 
-```
+```html
 <script type="text/javascript">
 jstfuel.init({
 	compile_src: '/path/to/compiled/templates.js',
@@ -60,7 +60,7 @@ jstfuel.init({
 or
 
 
-```
+```html
 <script type="text/javascript">
 jstfuel.init({
 	compile_src: '/path/to/compiled/templates.js',
@@ -80,7 +80,7 @@ jstfuel allows you to automatically fetch and load your JST template file withou
 
 If you have multiple compiled JST files that your application uses, jstfuel can handle them all. All you have to do is define them in the `init` call. jstfuel will provide you with a different template method for each namespace (or file) you define in the init. In order to define each file, your config will look like this:
 
-```
+```html
 <script type="text/javascript">
 jstfuel.init({
 	ns1: {
