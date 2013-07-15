@@ -1,6 +1,6 @@
 jstfuel = (function()
 {
-	var watch = {},
+	var _watching = {},
 	timeout = {},
 	templateSources = {};
 
@@ -57,7 +57,7 @@ jstfuel = (function()
 			return true;
 		}
 
-		if (watch[ nspace ])
+		if (_watching[ nspace ])
 		{
 			timeout[ nspace ] = setTimeout(function()
 			{
@@ -133,13 +133,12 @@ jstfuel = (function()
 			for (nspace in templateSources)
 			{
 				watch(nspace);
-				// watch[ nspace ] = true;
 			}
 
 			return true;
 		}
 
-		watch[ nspace ] = true;
+		_watching[ nspace ] = true;
 		_watchForTemplateChanges( nspace );
 	}
 
@@ -155,7 +154,7 @@ jstfuel = (function()
 			return true;
 		}
 
-		watch[ nspace ] = false;
+		_watching[ nspace ] = false;
 		clearTimeout(timeout[ nspace ]);
 	}
 
