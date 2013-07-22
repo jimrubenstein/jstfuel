@@ -6,7 +6,7 @@ jstfuel = (function()
 
 	var defaultTemplateAccessor = function(varname)
 	{
-		if (typeof varname == 'undefined')
+		if (undefined === varname)
 		{
 			varname = 'JST';
 		}
@@ -20,7 +20,7 @@ jstfuel = (function()
 
 	function _getAccessor(nspace)
 	{
-		if (undefined == typeof templateSources[ nspace ].accessor)
+		if (undefined === templateSources[ nspace ].accessor)
 		{
 			return defaultTemplateAccessor;
 		}
@@ -47,7 +47,7 @@ jstfuel = (function()
 
 	function _watchForTemplateChanges(nspace)
 	{
-		if (undefined == typeof nspace)
+		if (undefined === nspace)
 		{
 			for (nspace in templateSources)
 			{
@@ -104,21 +104,32 @@ jstfuel = (function()
 		});
 	}
 
+	function renderCurryGenerator(nspace)
+	{
+		return function(template)
+		{
+			return function(data)
+			{
+				return render(nspace, template, data);
+			};
+		};
+	}
+
 	function render(nspace, template, data)
 	{
-		if (undefined == templateSources[ nspace ])
+		if (undefined === templateSources[ nspace ])
 		{
 			throw new Error("JST Templates for " + nspace + " have not been loaded");
 		}
 
 		var accessor = _getAccessor( nspace );
 
-		if (undefined == accessor())
+		if (undefined === accessor())
 		{
 			throw new Error("JST Templates unavailable for namespace " + nspace);
 		}
 
-		if (undefined == accessor()[ template ])
+		if (undefined === accessor()[ template ])
 		{
 			throw new Error("JST template " + template + " undefined");
 		}
@@ -128,7 +139,7 @@ jstfuel = (function()
 
 	function watch(nspace)
 	{
-		if (undefined == typeof nspace)
+		if (undefined === nspace)
 		{
 			for (nspace in templateSources)
 			{
@@ -144,7 +155,7 @@ jstfuel = (function()
 
 	function unwatch(nspace)
 	{
-		if (undefined == nspace)
+		if (undefined === nspace)
 		{
 			for (nspace in templateSources)
 			{
@@ -160,7 +171,7 @@ jstfuel = (function()
 
 	function init(sources)
 	{
-		if (typeof sources.compiled_src != 'undefined')
+		if (undefined !== sources.compiled_src)
 		{
 			sources = { tpl: sources };
 		}
@@ -172,14 +183,7 @@ jstfuel = (function()
 				accessor: sources[ nspace ].accessor || defaultTemplateAccessor
 			};
 
-			jstfuel[ nspace ] = function(template)
-			{
-				return function(data)
-				{
-					return render(nspace, template, data);
-				};
-			};
-
+			jstfuel[ nspace ] = renderCurryGenerator(nspace);
 			_loadTemplates(nspace, true);
 		}
 	}
