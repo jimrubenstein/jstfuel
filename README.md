@@ -96,6 +96,8 @@ Template reloading will work outside of `dev` mode, but jstfuel will look for yo
 
 *Tip:* You can use [`grunt`](http://gruntjs.com) with [`grunt-contrib-jst`](https://github.com/gruntjs/grunt-contrib-jst) and [`grunt-contrib-watch`](https://github.com/gruntjs/grunt-contrib-watch) to recomiled your javascript templates whenever you make a change to them. This will reduce the number of HTTP requests it takes to reload your templates, probably pretty useful for larger applications that use a lot of templates.
 
+* * *
+
 ### Advanced configurations
 
 #### Accessing Compiled Templates
@@ -223,6 +225,8 @@ jstfuel.init({
 
 This will expose each namespace as it's own method on `jstfuel` and you will use it exactly in the same was as `tpl` in all the examples above. You *can* name any of your namespaces `tpl` if you wish, `tpl` is simply the name that is automatically given to your default compiled template namespace when you only pass the configuration for a single namespace.
 
+* * *
+
 ## API Reference
 
 **jstfuel.init**
@@ -237,10 +241,14 @@ This will expose each namespace as it's own method on `jstfuel` and you will use
 > >
 > > *getter* (mixed, optional)
 > > *allowed values:* string, object, function
+> >
 > > method of access to your compiled javascript templates.
-> > *string:* expects a global variable name, if nested inside objects must be dot-delimited (`'JST.My.Templates'`)
-> > *object:* expects a <tpl_name>:<compiled_tpl> object map of available templates
-> > *function:* takes 1 argument (template_name, a string, optional). should return requested template (as a callable function to render), or all templates as a <tpl_name>:<compiled_tpl> object map if no template is requested.
+> >
+> > > *string:* expects a global variable name, if nested inside objects must be dot-delimited (`'JST.My.Templates'`)
+> > >
+> > > *object:* expects a <tpl_name>:<compiled_tpl> object map of available templates
+> > >
+> > > *function:* takes 1 argument (template_name, a string, optional). should return requested template (as a callable function to render), or all templates as a <tpl_name>:<compiled_tpl> object map if no template is requested.
 > >
 > > *compiler* (function, optional)
 > > javascript template compiler function. takes 1 argument (template_content, string, required). returns a callable function to render the template content.
