@@ -84,7 +84,7 @@ jstfuel.init({
 
 Now, when we call `jstfuel.tpl('test.jst')` jstfuel will automatically make a request to `/js/templates/test.jst` to download the content of our template, and compile it using underscore.
 
-**Note:** A call to `jstfuel.mode` was executed after our `jstfuel.init` call. jstfuel only compiles raw templates when it is `dev` mode.
+**Note:** A call to `jstfuel.mode` was executed after our `jstfuel.init` call. jstfuel only compiles raw templates when it is in `dev` mode.
 
 ### Auto-reload
 
