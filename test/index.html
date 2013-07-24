@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>JSTFuel Testing Ground</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="http://underscorejs.org/underscore-min.js"></script>
+<script src="../js/jstfuel.js"></script>
+</head>
+<body>
+
+<div id="test"></div>
+
+<script type="text/javascript">
+(function()
+{
+	jstfuel.init({
+		tpl: {
+			compiled_src: '/test/js/templates.js',
+			getter: 'JST',
+
+			src_root: '/test/jst_src/'
+		}
+	})
+	.mode('dev');
+
+	var testTpl = jstfuel.tpl('test.jst');
+
+	$('#test').html(testTpl());
+
+
+	setTimeout(function(){
+		jstfuel.watch();
+
+		setTimeout(function()
+		{
+			console.log('re-rendering');
+			$('#test').html(testTpl());
+		}, 5000);
+
+	}, 10000);
+})();
+</script>
+</body>
+</html>

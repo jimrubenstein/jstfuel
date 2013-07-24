@@ -1,140 +1,375 @@
 jstfuel = (function()
 {
 	var _watching = {},
+	_mode = 'production',
 	timeout = {},
-	templateSources = {};
+	templateSources = {},
+	vars = {
+		MODE_DEV: 'dev',
+		MODE_PROD: 'production'
+	};
 
-	var defaultTemplateAccessor = function(varname)
+	function WatcherQueue()
 	{
-		if (undefined === varname)
-		{
-			varname = 'JST';
-		}
-		else if (typeof varname != 'string')
-		{
-			throw new Exception("Invalid argument for default template accessor");
-		}
+		this.queue = [];
+		this.timeout = null;
+		this.timeoutInterval = 15000;
 
-		return eval(varname);
+		this.running = false;
 	}
 
-	function _getAccessor(nspace)
+	WatcherQueue.prototype.watchInterval = function(interval)
 	{
-		if (undefined === templateSources[ nspace ].accessor)
+		if (undefined == interval) return this.timeoutInterval / 1000; //return in seconds
+
+		this.timeoutInterval = interval * 1000; //stored in ms
+		this.stop();
+		this.start();
+
+		return this;
+	}
+
+	WatcherQueue.prototype.watch = function(nspace)
+	{
+		if (this.queue.indexOf(nspace) == -1)
 		{
-			return defaultTemplateAccessor;
+			this.queue.push(nspace);
+
+			if (!this.running) this.start();
 		}
-		else
+
+		return this;
+	}
+
+	WatcherQueue.prototype.unwatch = function(nspace)
+	{
+		if (this.queue.indexOf(nspace) > -1)
 		{
-			if ('string' == typeof templateSources[ nspace ].accessor)
+			this.queue.splice(this.queue.indexOf(nspace), 1);
+		}
+
+		if (this.queue.length == 0) this.stop();
+
+		return this;
+	}
+
+	WatcherQueue.prototype.start = function()
+	{
+		this.running = true;
+		this._processQueue();
+	}
+
+	WatcherQueue.prototype.stop = function()
+	{
+		if (this.timeout) clearTimeout(this.timeout);
+		this.timeout = null;
+		this.running = false;
+
+		return this;
+	}
+
+	WatcherQueue.prototype._processQueue = function()
+	{
+		var completed = 0,
+			self = this;
+
+		var process = function(onDone)
+		{
+			if (self.queue.length == 0)
 			{
-				return function()
-				{
-					return defaultTemplateAccessor( templateSources[ nspace ].accessor );
-				};
+				return onDone.call(self);
+			}
+			else if (completed == self.queue.length)
+			{
+				return onDone.call(self);
+			}
+			else if (false == self.running)
+			{
+				return onDone.call(self);
+			}
+
+			var current = self.queue[ completed ];
+
+			log('Loading templates for ' + current);
+			templateSources[ current ].loadTemplate(null, true, function()
+			{
+				log('Templates loaded (' + current + ')');
+				completed++;
+				return process(onDone);
+			});
+		}
+
+		process(this._waitToProcess);
+	}
+
+	WatcherQueue.prototype._waitToProcess = function()
+	{
+		if (this.running)
+		{
+			var self = this;
+			this.timeout = setTimeout(function()
+			{
+				self._processQueue.call(self);
+			}, this.timeoutInterval);
+		}
+
+		return this;
+	}
+
+
+	function TemplateSource(opts)
+	{
+		this.compiled_src = opts.compiled_src || null;
+		this.getter = opts.accessor || opts.getter || this.get;
+		this.src_root = opts.src_root || null;
+		this.compiler = opts.compiler || this.compiler;
+
+		this._tplCache = {};
+		this._tplLoaded = false;
+		this._watching = false;
+
+		return this;
+	}
+
+	TemplateSource.prototype.watch = function(status)
+	{
+		if (undefined === status) return status;
+		this._watching = status;
+
+		return this;
+	}
+
+	TemplateSource.prototype.renderer = function(template)
+	{
+		var self = this;
+
+		this.loadTemplate(template, true);
+
+		return function(data)
+		{
+			return self.render(template, data);
+		}
+	}
+
+	TemplateSource.prototype.render = function(template, data)
+	{
+		return this.getTemplate(template)(data);
+	}
+
+	TemplateSource.prototype.getter = 'JST';
+	TemplateSource.prototype.get = function(tpl_name)
+	{
+		if ('string' == typeof this.getter)
+		{
+			var tpls = resolveVarName(this.getter);
+
+			if (undefined !== tpl_name) return tpls? tpls[ tpl_name ] : undefined;
+			return tpls;
+		}
+		else if ('function' == typeof this.getter)
+		{
+			return this.getter(tpl_name);
+		}
+		else if ('object' == typeof this.getter)
+		{
+			if (undefined !== tpl_name) return this.getter[ tpl_name ];
+
+			return this.getter;
+		}
+
+		throw "jstfuel doesn't know how to process your template getter.";
+	}
+
+	TemplateSource.prototype.getTemplate = function(template)
+	{
+		/* How do we load templates in Production vs Dev?
+		- In dev we load from the uncompiled source if it's available, otherwise we load from the standard loader
+		- In prod we load only from the compiled source
+		*/
+		if (undefined == this._tplCache[ template ])
+		{
+			if (undefined == this.get(template))
+			{
+				this.loadTemplate(template, false);
+
+				return this.getTemplate( template );
 			}
 			else
 			{
-				return templateSources[ nspace ].accessor
+				this._tplCache[ template ] = this.get(template);
 			}
 		}
+
+		return this._tplCache[ template ];
 	}
 
-	function _getSrc(nspace)
+	TemplateSource.prototype.loadTemplate = function(template, async, cb)
 	{
-		return templateSources[ nspace ].src;
-	}
-
-	function _watchForTemplateChanges(nspace)
-	{
-		if (undefined === nspace)
+		if (vars.MODE_DEV == mode() && this.src_root)
 		{
-			for (nspace in templateSources)
+			var async = (undefined === async? false : async);
+
+			if (undefined === template || null === template)
 			{
-				_watchForTemplateChanges( nspace );
+				var completed = 0,
+					self = this;
+
+				function load()
+				{
+					if (Object.keys( self._tplCache ).length == 0)
+					{
+						return cb.call();
+					}
+					else if (Object.keys( self._tplCache ).length == completed)
+					{
+						return cb.call();
+					}
+
+					var current_key = Object.keys( self._tplCache )[ completed ];
+
+					self.loadRawTemplate(current_key, async, function()
+					{
+						completed++;
+						load();
+					});
+				}
+
+				load();
 			}
-
-			return true;
-		}
-
-		if (_watching[ nspace ])
-		{
-			timeout[ nspace ] = setTimeout(function()
+			else
 			{
-				_checkForTemplateChanges( nspace );
-			}, 5000);
+				this.loadRawTemplate(template, async, cb);
+			}
+		}
+		else
+		{
+			this.loadCompiledTemplates((undefined === async? true : async), cb);
 		}
 	}
 
-	function _checkForTemplateChanges(nspace)
+	TemplateSource.prototype.loadCompiledTemplates = function(async, cb)
 	{
-		var xhr = $.ajax({
-			type: "HEAD",
-			ifModified: true,
-			url: _getSrc( nspace ),
-		})
-		.done(function(response, status, jqxhr)
-		{
-			//if this finishes successfully, according to the 'ifModified' documentation
-			//this method will only be called if the file has been modified.
-			//which means, we can load it.
-			_loadTemplates(nspace);
-
-		})
-		.fail(function()
-		{
-			_watchForTemplateChanges(nspace);
-		});
-
-		return xhr;
-	}
-
-	function _loadTemplates(nspace, sync)
-	{
+		var self = this;
 		return $.ajax({
-			url: _getSrc( nspace ),
+			url: this.compiled_src,
 			dataType: 'script',
 			cache: false,
 			type: 'GET',
-			async: sync? false : true
-		})
-		.always(function()
-		{
-			_watchForTemplateChanges(nspace);
+			async: (undefined === async? true : async),
+			success: function()
+			{
+				self.cacheTemplate(self.get());
+				if (undefined !== cb) cb();
+			}
 		});
 	}
 
-	function renderCurryGenerator(nspace)
+	TemplateSource.prototype.loadRawTemplate = function(template, async, cb)
 	{
-		return function(template)
-		{
-			return function(data)
+		var self = this;
+
+		return $.ajax({
+			url: this.src_root + ("/" + template).replace(/^\/\//, '/'),
+			dataType: 'text',
+			cache: false,
+			type: "GET",
+			async: (undefined === async? false : async),
+			success: function(data)
 			{
-				return render(nspace, template, data);
-			};
-		};
+				self.compileTemplate(template, data);
+
+				if (undefined !== cb) cb();
+			},
+			error: function(xhr, status, error)
+			{
+				throw error;
+			}
+		});
 	}
 
-	function render(nspace, template, data)
+	TemplateSource.prototype.cacheTemplate = function() // tpl_object (key=>val) map of template fns, or tpl_name, tpl fn
 	{
-		if (undefined === templateSources[ nspace ])
+		var tpl_object = {};
+		if (arguments.length == 2)
 		{
-			throw new Error("JST Templates for " + nspace + " have not been loaded");
+			tpl_object[ arguments[0] ] = arguments[1];
+		}
+		else
+		{
+			tpl_object = arguments[0];
 		}
 
-		var accessor = _getAccessor( nspace );
-
-		if (undefined === accessor())
+		for (tpl_name in tpl_object)
 		{
-			throw new Error("JST Templates unavailable for namespace " + nspace);
+			var tpl_fn = tpl_object[ tpl_name ];
+			this._tplCache[ tpl_name ] = tpl_fn;
 		}
 
-		if (undefined === accessor()[ template ])
+		return this;
+	}
+
+	TemplateSource.prototype.compileTemplate = function(tpl_name, tpl)
+	{
+		this.cacheTemplate(tpl_name, this.compiler(tpl));
+
+		return this;
+	}
+
+	TemplateSource.prototype.compiler = function(tpl_data)
+	{
+		return _.template( tpl_data );
+	}
+
+	function resolveVarName(varname)
+	{
+		var tpls = null,
+			root = window;
+
+		if (varname.indexOf('.') > -1)
 		{
-			throw new Error("JST template " + template + " undefined");
+			var nameparts = varname.split('.'),
+				part = null;
+
+			for (var i = 0, l = nameparts.length; i < l; i++)
+			{
+				part = nameparts[i];
+
+				if (undefined !== root[ part ])
+				{
+					root = root[part];
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			tpls = root;
+		}
+		else if (undefined !== root[ varname ])
+		{
+
+			tpls = root[ varname ];
+		}
+		else
+		{
+			return null;
 		}
 
-		return accessor()[ template ](data);
+		return tpls;
+	}
+
+	function mode(mode)
+	{
+		if (undefined === mode)
+		{
+			return _mode;
+		}
+		else
+		{
+			_mode = mode;
+			return jstfuelAPI;
+		}
 	}
 
 	function watch(nspace)
@@ -149,8 +384,15 @@ jstfuel = (function()
 			return true;
 		}
 
-		_watching[ nspace ] = true;
-		_watchForTemplateChanges( nspace );
+		if (undefined !== templateSources[ nspace ])
+		{
+			templateSources[ nspace ].watch(true);
+			Watcher.watch( nspace );
+
+			return true;
+		}
+
+		return false;
 	}
 
 	function unwatch(nspace)
@@ -165,8 +407,28 @@ jstfuel = (function()
 			return true;
 		}
 
-		_watching[ nspace ] = false;
-		clearTimeout(timeout[ nspace ]);
+		if (undefined !== templateSources[ nspace ])
+		{
+			templateSources[ nspace ].watch(false);
+			Watcher.unwatch( nspace );
+
+			return true;
+		}
+
+		return false;
+	}
+
+	function watchInterval(interval)
+	{
+		Watcher.watchInterval(interval);
+	}
+
+	function log()
+	{
+		if (console && console.log)
+		{
+			console.log.apply(console, arguments);
+		}
 	}
 
 	function init(sources)
@@ -178,23 +440,39 @@ jstfuel = (function()
 
 		for (nspace in sources)
 		{
-			templateSources[ nspace ] = {
-				src: sources[ nspace ].compiled_src,
-				accessor: sources[ nspace ].accessor || defaultTemplateAccessor
-			};
+			templateSources[ nspace ] = new TemplateSource({
+				//where to load copmiled templates from
+				compiled_src: sources[ nspace ].compiled_src,
 
-			jstfuel[ nspace ] = renderCurryGenerator(nspace);
-			_loadTemplates(nspace, true);
+				//how to access the compiled templates
+				getter: sources[ nspace ].accessor || sources[ nspace ].getter || null,
+
+				//the base URL for loading uncompiled templates
+				src_root: sources[ nspace ].src_root || null,
+
+				//what engine to use to compile a template
+				compiler: sources[ nspace ].compiler || null,
+			});
+
+			jstfuel[ nspace ] = function()
+			{
+				return templateSources[ nspace ].renderer.apply(templateSources[nspace], arguments);
+			}
 		}
+
+		return jstfuelAPI;
 	}
 
-	return {
+	var Watcher = new WatcherQueue();
+	var jstfuelAPI = {
 		init: init,
+		mode: mode,
 
 		watch: watch,
 		unwatch: unwatch,
-
-		render: render
+		watchInterval: watchInterval
 	};
+
+	return jstfuelAPI;
 
 })();
