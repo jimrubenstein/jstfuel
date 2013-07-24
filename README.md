@@ -245,7 +245,7 @@ This will expose each namespace as it's own method on `jstfuel` and you will use
 > >
 > > method of access to your compiled javascript templates.
 > >
-> > > *string:* expects a global variable name, if nested inside objects must be dot-delimited (`'JST.My.Templates'`)
+> > > **string:** expects a global variable name, if nested inside objects must be dot-delimited (`'JST.My.Templates'`)
 > > >
 > > > **object:** expects a <tpl_name>:<compiled_tpl> object map of available templates
 > > >
