@@ -47,7 +47,7 @@ $('#test').html(testTpl());
 
 The returned function from `jstfuel.tpl` is the same function that underscore generates when it compiles your templates. You can read more about [underscore templates](http://underscorejs.org/#template) over at [underscorejs.org](http://underscorejs.org/).
 
-* **Note:** * There is no script file for `/js/templates.js` to load our compiled templates. You may choose to include or exclude this script tag. If you exclude it, `jstfuel` will automatically load it when you first call `jstfuel.tpl` with your template name. This is an asynchronus request, so it will happen in the background. If your templates haven't loaded by the time they are executed (rendered), jstfuel will create a synchronus request for the template file, which will halt further execution until the templates become available.
+**Note:** There is no script file for `/js/templates.js` to load our compiled templates. You may choose to include or exclude this script tag. If you exclude it, `jstfuel` will automatically load it when you first call `jstfuel.tpl` with your template name. This is an asynchronus request, so it will happen in the background. If your templates haven't loaded by the time they are executed (rendered), jstfuel will create a synchronus request for the template file, which will halt further execution until the templates become available.
 
 ## Diving deeper
 
@@ -84,7 +84,7 @@ jstfuel.init({
 
 Now, when we call `jstfuel.tpl('test.jst')` jstfuel will automatically make a request to `/js/templates/test.jst` to download the content of our template, and compile it using underscore.
 
-* **Note:** * A call to `jstfuel.mode` was executed after our `jstfuel.init` call. jstfuel only compiles raw templates when it is `dev` mode.
+**Note:** A call to `jstfuel.mode` was executed after our `jstfuel.init` call. jstfuel only compiles raw templates when it is `dev` mode.
 
 ### Auto-reload
 
