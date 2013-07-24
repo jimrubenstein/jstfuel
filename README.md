@@ -230,31 +230,34 @@ This will expose each namespace as it's own method on `jstfuel` and you will use
 ## API Reference
 
 **jstfuel.init**
-> *config* (object, required)
+> **config** (object, required)
+>
 > The configuration a single, or multiple, javascript template namespaces. If only a single configuration is specified, the `tpl` method is assigned as the access method to that namespace.
 >
-> > *compiled_src* (string, required)
+> > **compiled_src** (string, required)
 > > path to the javascript file containing your compiled javasript templates
 > >
-> > *src_root* (string, optional)
+> > **src_root** (string, optional)
 > > base directory that your raw javascript template files are located
 > >
-> > *getter* (mixed, optional)
+> > **getter** (mixed, optional)
 > > *allowed values:* string, object, function
 > >
 > > method of access to your compiled javascript templates.
 > >
 > > > *string:* expects a global variable name, if nested inside objects must be dot-delimited (`'JST.My.Templates'`)
 > > >
-> > > *object:* expects a <tpl_name>:<compiled_tpl> object map of available templates
+> > > **object:** expects a <tpl_name>:<compiled_tpl> object map of available templates
 > > >
-> > > *function:* takes 1 argument (template_name, a string, optional). should return requested template (as a callable function to render), or all templates as a <tpl_name>:<compiled_tpl> object map if no template is requested.
+> > > **function:** takes 1 argument (template_name, a string, optional). should return requested template (as a callable function to render), or all templates as a <tpl_name>:<compiled_tpl> object map if no template is requested.
 > >
-> > *compiler* (function, optional)
+> > **compiler** (function, optional)
+> >
 > > javascript template compiler function. takes 1 argument (template_content, string, required). returns a callable function to render the template content.
 
 **jstfuel.mode**
-> *mode* (string, optional)
+> **mode** (string, optional)
+>
 > Get or set the mode on jstfuel.
 > Allowed values:
 > - 'dev'
@@ -265,18 +268,24 @@ This will expose each namespace as it's own method on `jstfuel` and you will use
 > *Note:* in `dev` mode jstfuel automatically compiles templates from raw source using the configured `compiler` (or underscore if no compiler defined).
 
 **jstfuel.watch**
-> *nspace* (string, optional)
+> **nspace** (string, optional)
+>
 > Start watching/updating template namespaces.
+>
 > *nspace* should match the namespace name given to the javascript source on init. (`tpl` if default namespace option used).
+>
 > If no *nspace* string is present, jstfuel will start watching all namespaces
 
 **jstfuel.unwatch**
-> *nspace* (string, optional)
+> **nspace** (string, optional)
+>
 > Stop watching template namespace specified.
+>
 > If no *nspace* specified, stop watching all namespaces
 
 **jstfuel.watchInterval**
-> *interval* (int, required)
+> **interval** (int, required)
+>
 > Change the interval that jstfuel waits between loading new templates
 
 
