@@ -1,12 +1,12 @@
 jstfuel = (function()
 {
 	var _watching = {},
-	_mode = 'production',
+	_mode = 'prod',
 	timeout = {},
 	templateSources = {},
 	vars = {
 		MODE_DEV: 'dev',
-		MODE_PROD: 'production'
+		MODE_PROD: 'prod'
 	};
 
 	function WatcherQueue()
