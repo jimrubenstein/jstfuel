@@ -440,6 +440,8 @@ jstfuel = (function()
 
 		for (nspace in sources)
 		{
+			if (nspace in jstfuelAPI) throw "Can not overwrite jstfuel base api methods. (" + nspace + ")";
+
 			templateSources[ nspace ] = new TemplateSource({
 				//where to load copmiled templates from
 				compiled_src: sources[ nspace ].compiled_src,
