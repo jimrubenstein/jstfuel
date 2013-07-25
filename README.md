@@ -293,7 +293,8 @@ This will expose each namespace as it's own method on `jstfuel` and you will use
 
 ## Author
 
-jstfuel is created and maintained by [Jim Rubenstein](http://www.github.com/jimrubenstein). Jim is the CTO at [LoudDoor](http://www.louddoor.com). You can follow him on twitter [@jim_rubenstein](http://www.twitter.com/jrubsc).
+jstfuel is created and maintained by [Jim Rubenstein](http://www.github.com/jimrubenstein).
+You can follow him on twitter [@jrubsc](http://www.twitter.com/jrubsc).
 
 
 ## License
