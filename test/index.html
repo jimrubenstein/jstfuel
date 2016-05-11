@@ -4,7 +4,7 @@
 <title>JSTFuel Testing Ground</title>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="http://underscorejs.org/underscore-min.js"></script>
-<script src="../js/jstfuel.js"></script>
+<script src="../dist/jstfuel.min.js"></script>
 </head>
 <body>
 
@@ -15,10 +15,10 @@
 {
 	jstfuel.init({
 		tpl: {
-			compiled_src: '/test/js/templates.js',
+			compiled_src: 'js/templates.js',
 			getter: 'JST',
 
-			src_root: '/test/jst_src/'
+			src_root: 'jst_src/'
 		}
 	})
 	.mode('dev');

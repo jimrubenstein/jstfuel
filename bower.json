@@ -1,0 +1,19 @@
+{
+  "name": "jstfuel",
+  "homepage": "https://github.com/jimrubenstein/jstfuel",
+  "authors": [
+    "Jim Rubenstein <git@jimsc.com>"
+  ],
+  "description": "jstfuel is a library that wraps your javascript template access in your application. jstfuel will handle loading compiled or uncompiled templates for you, when your application needs access to them.",
+  "license": "MIT",
+  "main": [
+    "dist/jstfuel.min.js",
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
